@@ -16,10 +16,9 @@
 package io.gravitee.rest.api.model.api;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.gravitee.definition.model.Path;
+import io.gravitee.definition.model.*;
 import io.gravitee.definition.model.Properties;
-import io.gravitee.definition.model.Proxy;
-import io.gravitee.definition.model.ResponseTemplates;
+import io.gravitee.definition.model.flow.Flow;
 import io.gravitee.definition.model.plugins.resources.Resource;
 import io.gravitee.definition.model.services.Services;
 import io.gravitee.rest.api.model.ApiMetadataEntity;
@@ -64,6 +63,16 @@ public class UpdateApiEntity {
     @ApiModelProperty(
             value = "a map where you can associate a path to a configuration (the policies configuration)")
     private Map<String, Path> paths = new HashMap<>();
+
+    @JsonProperty(value = "flows", required = true)
+    @ApiModelProperty(
+        value = "a list of flows (the policies configuration)")
+    private List<Flow> flows = new ArrayList<>();
+
+    @JsonProperty(value = "plans", required = true)
+    @ApiModelProperty(
+        value = "a list of plans with flows (the policies configuration)")
+    private Collection<Plan> plans = new ArrayList<>();
 
     @ApiModelProperty(
             value = "The configuration of API services like the dynamic properties, the endpoint discovery or the healthcheck.")
@@ -295,5 +304,21 @@ public class UpdateApiEntity {
 
     public void setBackground(String background) {
         this.background = background;
+    }
+
+    public List<Flow> getFlows() {
+        return flows;
+    }
+
+    public void setFlows(List<Flow> flows) {
+        this.flows = flows;
+    }
+
+    public Collection<Plan> getPlans() {
+        return plans;
+    }
+
+    public void setPlans(Collection<Plan> plans) {
+        this.plans = plans;
     }
 }

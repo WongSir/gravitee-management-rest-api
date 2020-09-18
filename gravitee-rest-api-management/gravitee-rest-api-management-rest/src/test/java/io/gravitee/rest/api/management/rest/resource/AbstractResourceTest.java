@@ -21,6 +21,7 @@ import io.gravitee.rest.api.security.authentication.AuthenticationProviderManage
 import io.gravitee.rest.api.security.cookies.CookieGenerator;
 import io.gravitee.rest.api.service.*;
 import io.gravitee.rest.api.service.configuration.application.ApplicationTypeService;
+import io.gravitee.rest.api.service.configuration.flow.FlowService;
 import io.gravitee.rest.api.service.impl.swagger.policy.PolicyOperationVisitorManager;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -151,6 +152,9 @@ public abstract class AbstractResourceTest extends JerseySpringTest {
 
     @Autowired
     protected CustomUserFieldService customUserFieldService;
+
+    @Autowired
+    protected PlanService flowService;
 
     @Configuration
     @PropertySource("classpath:/io/gravitee/rest/api/management/rest/resource/jwt.properties")
@@ -320,6 +324,12 @@ public abstract class AbstractResourceTest extends JerseySpringTest {
         public CustomUserFieldService customUserFieldService() {
             return mock(CustomUserFieldService.class);
         }
+
+        @Bean
+        public FlowService flowService() {
+            return mock(FlowService.class);
+        }
+
 
     }
 }

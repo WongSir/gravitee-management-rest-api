@@ -13,20 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.gravitee.rest.api.service;
+package io.gravitee.rest.api.service.configuration.flow;
 
-import io.gravitee.definition.model.Policy;
-import io.gravitee.definition.model.flow.Step;
-import io.gravitee.rest.api.model.PolicyEntity;
+public interface FlowService {
 
-/**
- * @author David BRASSELY (david.brassely at graviteesource.com)
- * @author GraviteeSource Team
- */
-public interface PolicyService extends PluginService<PolicyEntity> {
-
-    void validatePolicyConfiguration(Policy policy);
-
-    void validatePolicyConfiguration(Step step);
+    String getSchema();
 
 }

@@ -1,0 +1,64 @@
+{
+  "type": "object",
+  "id": "apim",
+  "properties": {
+    "name": {
+      "title": "Name",
+      "description": "The name of flow. If empty, the name will be generated with the path and methods",
+      "type": "string"
+    },
+    "description": {
+      "title": "Description",
+      "description": "The description of flow",
+      "type": "string"
+    },
+    "path-operator": {
+      "type": "object",
+      "properties": {
+        "operator": {
+          "title": "Operator path",
+          "description": "The operator path",
+          "type": "string",
+          "enum": [
+            "EQUALS",
+            "STARTS_WITH"
+          ],
+          "default": "STARTS_WITH"
+        },
+        "path": {
+          "title": "Path",
+          "description": "The path of flow (must start by /)",
+          "type": "string",
+          "pattern": "^/"
+        }
+      },
+      "required": [
+        "path",
+        "operator"
+      ]
+    },
+    "methods": {
+      "title": "Methods",
+      "description": "The methods of flow",
+      "type": "array",
+      "enum": [
+        "GET",
+        "HEAD",
+        "POST",
+        "PUT",
+        "DELETE",
+        "CONNECT",
+        "OPTIONS",
+        "TRACE",
+        "PATCH"
+      ]
+    },
+    "condition": {
+      "title": "Condition",
+      "description": "The condition of flow",
+      "type": "string"
+    }
+  },
+  "required": [],
+  "disabled": []
+}

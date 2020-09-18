@@ -25,6 +25,7 @@ import io.gravitee.rest.api.model.PageEntity;
 import io.gravitee.rest.api.model.PlanValidationType;
 import io.gravitee.rest.api.model.SubscriptionEntity;
 import io.gravitee.rest.api.model.UpdatePlanEntity;
+import io.gravitee.rest.api.model.api.ApiEntity;
 import io.gravitee.rest.api.service.exceptions.PlanGeneralConditionStatusException;
 import io.gravitee.rest.api.service.impl.PlanServiceImpl;
 import io.gravitee.rest.api.service.processor.PlanSynchronizationProcessor;
@@ -73,6 +74,12 @@ public class PlanService_UpdateTest {
     private PageService pageService;
 
     @Mock
+    private ApiService apiService;
+
+    @Mock
+    private ApiEntity apiEntity;
+
+    @Mock
     private ParameterService parameterService;
     @Mock
     private PlanSynchronizationProcessor synchronizationProcessor;
@@ -89,6 +96,7 @@ public class PlanService_UpdateTest {
         when(plan.getApi()).thenReturn(API_ID);
         when(planRepository.findById(PLAN_ID)).thenReturn(Optional.of(plan));
         when(parameterService.findAsBoolean(any())).thenReturn(true);
+        when(apiService.findById(API_ID)).thenReturn(apiEntity);
 
         UpdatePlanEntity updatePlan = mock(UpdatePlanEntity.class);
         when(updatePlan.getId()).thenReturn(PLAN_ID);
@@ -100,6 +108,7 @@ public class PlanService_UpdateTest {
 
         verify(planRepository).update(any());
         verify(parameterService).findAsBoolean(any());
+        verify(apiService).update(anyString(), any());
     }
 
     @Test
@@ -120,6 +129,7 @@ public class PlanService_UpdateTest {
         when(updatePlan.getName()).thenReturn("NameUpdated");
         when(updatePlan.getGeneralConditions()).thenReturn(PAGE_ID);
         when(planRepository.update(any())).thenAnswer(returnsFirstArg());
+        when(apiService.findById(API_ID)).thenReturn(apiEntity);
 
         PageEntity unpublishedPage = new PageEntity();
         unpublishedPage.setId(PAGE_ID);
@@ -179,6 +189,7 @@ public class PlanService_UpdateTest {
         when(plan.getGeneralConditions()).thenReturn(PAGE_ID);
         when(planRepository.findById(PLAN_ID)).thenReturn(Optional.of(plan));
         when(parameterService.findAsBoolean(any())).thenReturn(true);
+        when(apiService.findById(API_ID)).thenReturn(apiEntity);
 
         UpdatePlanEntity updatePlan = mock(UpdatePlanEntity.class);
         when(updatePlan.getId()).thenReturn(PLAN_ID);

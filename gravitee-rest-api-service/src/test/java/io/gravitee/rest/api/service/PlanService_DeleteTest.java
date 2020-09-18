@@ -19,6 +19,8 @@ import io.gravitee.repository.exceptions.TechnicalException;
 import io.gravitee.repository.management.api.PlanRepository;
 import io.gravitee.repository.management.model.Plan;
 import io.gravitee.rest.api.model.SubscriptionEntity;
+import io.gravitee.rest.api.model.api.ApiEntity;
+import io.gravitee.rest.api.model.api.UpdateApiEntity;
 import io.gravitee.rest.api.service.exceptions.PlanWithSubscriptionsException;
 import io.gravitee.rest.api.service.exceptions.TechnicalManagementException;
 import io.gravitee.rest.api.service.impl.PlanServiceImpl;
@@ -41,6 +43,7 @@ import static org.mockito.Mockito.*;
 @RunWith(MockitoJUnitRunner.class)
 public class PlanService_DeleteTest {
 
+    private static final String API_ID = "my-api";
     private static final String PLAN_ID = "my-plan";
 
     @InjectMocks
@@ -61,6 +64,12 @@ public class PlanService_DeleteTest {
     @Mock
     private AuditService auditService;
 
+    @Mock
+    private ApiService apiService;
+
+    @Mock
+    private ApiEntity api;
+
 
     @Test(expected = PlanWithSubscriptionsException.class)
     public void shouldNotDeleteBecauseSubscriptionsExist() throws TechnicalException {
@@ -76,7 +85,8 @@ public class PlanService_DeleteTest {
         when(plan.getStatus()).thenReturn(Plan.Status.STAGING);
         when(planRepository.findById(PLAN_ID)).thenReturn(Optional.of(plan));
         when(subscriptionService.findByPlan(PLAN_ID)).thenReturn(Collections.emptySet());
-        when(plan.getApi()).thenReturn("id");
+        when(plan.getApi()).thenReturn(API_ID);
+        when(apiService.findById(API_ID)).thenReturn(api);
         when(planRepository.findByApi(any())).thenReturn(Collections.emptySet());
 
         planService.delete(PLAN_ID);
@@ -96,7 +106,8 @@ public class PlanService_DeleteTest {
         when(plan.getStatus()).thenReturn(Plan.Status.CLOSED);
         when(planRepository.findById(PLAN_ID)).thenReturn(Optional.of(plan));
         when(subscriptionService.findByPlan(PLAN_ID)).thenReturn(Collections.emptySet());
-        when(plan.getApi()).thenReturn("id");
+        when(plan.getApi()).thenReturn(API_ID);
+        when(apiService.findById(API_ID)).thenReturn(api);
         when(planRepository.findByApi(any())).thenReturn(Collections.emptySet());
 
         planService.delete(PLAN_ID);
@@ -109,7 +120,8 @@ public class PlanService_DeleteTest {
         when(plan.getStatus()).thenReturn(Plan.Status.PUBLISHED);
         when(planRepository.findById(PLAN_ID)).thenReturn(Optional.of(plan));
         when(subscriptionService.findByPlan(PLAN_ID)).thenReturn(Collections.emptySet());
-        when(plan.getApi()).thenReturn("id");
+        when(plan.getApi()).thenReturn(API_ID);
+        when(apiService.findById(API_ID)).thenReturn(api);
         when(planRepository.findByApi(any())).thenReturn(Collections.emptySet());
 
         planService.delete(PLAN_ID);
@@ -121,11 +133,31 @@ public class PlanService_DeleteTest {
     public void shouldDelete() throws TechnicalException {
         when(planRepository.findById(PLAN_ID)).thenReturn(Optional.of(plan));
         when(subscriptionService.findByPlan(PLAN_ID)).thenReturn(Collections.emptySet());
-        when(plan.getApi()).thenReturn("id");
+        when(plan.getApi()).thenReturn(API_ID);
+        when(apiService.findById(API_ID)).thenReturn(api);
         when(planRepository.findByApi(any())).thenReturn(Collections.emptySet());
 
         planService.delete(PLAN_ID);
 
         verify(planRepository, times(1)).delete(PLAN_ID);
+        verify(apiService, times(0)).update(anyString(), any(UpdateApiEntity.class));
+    }
+
+
+    @Test
+    public void shouldDeleteAndUpdateApiDefinition() throws TechnicalException {
+        when(planRepository.findById(PLAN_ID)).thenReturn(Optional.of(plan));
+        when(subscriptionService.findByPlan(PLAN_ID)).thenReturn(Collections.emptySet());
+        when(plan.getApi()).thenReturn(API_ID);
+        io.gravitee.definition.model.Plan planDefinition = mock(io.gravitee.definition.model.Plan.class);
+        when(planDefinition.getId()).thenReturn(PLAN_ID);
+        when(api.getPlans()).thenReturn(Collections.singletonList(planDefinition));
+        when(apiService.findById(API_ID)).thenReturn(api);
+        when(planRepository.findByApi(any())).thenReturn(Collections.emptySet());
+
+        planService.delete(PLAN_ID);
+
+        verify(planRepository, times(1)).delete(PLAN_ID);
+        verify(apiService, times(1)).update(anyString(), any(UpdateApiEntity.class));
     }
 }

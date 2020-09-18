@@ -113,6 +113,8 @@ public interface ApiService {
         updateApiEntity.setLabels(apiEntity.getLabels());
         updateApiEntity.setPathMappings(apiEntity.getPathMappings());
         updateApiEntity.setLifecycleState(apiEntity.getLifecycleState());
+        updateApiEntity.setPlans(apiEntity.getPlans());
+        updateApiEntity.setFlows(apiEntity.getFlows());
 
         return updateApiEntity;
     }
