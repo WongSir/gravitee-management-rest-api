@@ -20,10 +20,13 @@ import io.gravitee.rest.api.management.rest.model.Subscription;
 import io.gravitee.rest.api.management.rest.security.Permission;
 import io.gravitee.rest.api.management.rest.security.Permissions;
 import io.gravitee.rest.api.model.*;
+import io.gravitee.rest.api.model.parameters.Key;
 import io.gravitee.rest.api.model.permissions.RolePermission;
 import io.gravitee.rest.api.model.permissions.RolePermissionAction;
 import io.gravitee.rest.api.service.*;
+import io.gravitee.rest.api.validator.CustomApiKey;
 import io.swagger.annotations.*;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
@@ -58,6 +61,9 @@ public class ApiSubscriptionResource extends AbstractResource {
 
     @Inject
     private UserService userService;
+
+    @Inject
+    private ParameterService parameterService;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -201,11 +207,21 @@ public class ApiSubscriptionResource extends AbstractResource {
     })
     public Response renewApiKey(
             @PathParam("api") String api,
-            @PathParam("subscription") String subscription) {
-        ApiKeyEntity apiKeyEntity = apiKeyService.renew(subscription);
+            @PathParam("subscription") String subscription,
+            @ApiParam(name = "customApiKey")
+            @CustomApiKey @QueryParam("customApiKey") String customApiKey) {
+
+        if (StringUtils.isNotEmpty(customApiKey)
+                && !parameterService.findAsBoolean(Key.PLAN_SECURITY_APIKEY_CUSTOM_ALLOWED)) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("You are not allowed to provide a custom API Key")
+                    .build();
+        }
+
+        ApiKeyEntity apiKeyEntity = apiKeyService.renew(subscription, customApiKey);
         return Response
                 .created(URI.create("/apis/" + api + "/subscriptions/" + subscription +
-                        "/keys" + apiKeyEntity.getKey()))
+                        "/keys/" + apiKeyEntity.getKey()))
                 .entity(apiKeyEntity)
                 .build();
     }

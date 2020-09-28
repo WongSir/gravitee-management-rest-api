@@ -152,6 +152,12 @@ public abstract class AbstractResourceTest extends JerseySpringTest {
     @Autowired
     protected CustomUserFieldService customUserFieldService;
 
+    @Autowired
+    protected ApiKeyService apiKeyService;
+
+    @Autowired
+    protected SubscriptionService subscriptionService;
+
     @Configuration
     @PropertySource("classpath:/io/gravitee/rest/api/management/rest/resource/jwt.properties")
     static class ContextConfiguration {
@@ -321,5 +327,14 @@ public abstract class AbstractResourceTest extends JerseySpringTest {
             return mock(CustomUserFieldService.class);
         }
 
+        @Bean
+        public ApiKeyService apiKeyService() {
+            return mock(ApiKeyService.class);
+        }
+
+        @Bean
+        public SubscriptionService subscriptionService() {
+            return mock(SubscriptionService.class);
+        }
     }
 }
