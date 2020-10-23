@@ -71,7 +71,7 @@ public class SwaggerService_TransformTest {
     public void shouldTransformAPIFromSwaggerV3_json() throws IOException {
         PageEntity pageEntity = getPage("io/gravitee/management/service/openapi.json", MediaType.APPLICATION_JSON);
 
-        OAIDescriptor descriptor = (OAIDescriptor) swaggerService.parse(pageEntity.getContent());
+        OAIDescriptor descriptor = (OAIDescriptor) swaggerService.parse(pageEntity.getContent(), true);
 
         swaggerService.transform(descriptor,
                 Collections.singleton(new PageConfigurationOAITransformer(pageEntity)));
@@ -84,7 +84,7 @@ public class SwaggerService_TransformTest {
     public void shouldTransformAPIFromSwaggerV3_yaml() throws IOException {
         PageEntity pageEntity = getPage("io/gravitee/management/service/openapi.yaml", MediaType.TEXT_PLAIN);
 
-        OAIDescriptor descriptor = (OAIDescriptor) swaggerService.parse(pageEntity.getContent());
+        OAIDescriptor descriptor = (OAIDescriptor) swaggerService.parse(pageEntity.getContent(), true);
 
         swaggerService.transform(descriptor,
                 Collections.singleton(new PageConfigurationOAITransformer(pageEntity)));

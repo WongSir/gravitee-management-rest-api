@@ -169,7 +169,7 @@ public class PageServiceImpl extends TransactionalService implements PageService
             // If swagger page, let's try to apply transformations
             SwaggerDescriptor<?> descriptor = null;
             try {
-                descriptor = swaggerService.parse(pageEntity.getContent());
+                descriptor = swaggerService.parse(pageEntity.getContent(), false);
             } catch (SwaggerDescriptorException sde) {
                 if (apiId != null) {
                     logger.error("Parsing error for API : {}", apiId);
@@ -1236,7 +1236,7 @@ public class PageServiceImpl extends TransactionalService implements PageService
 				throw new PageContentUnsafeException(sanitizeInfos.getRejectedMessage());
 			}
         } else if (io.gravitee.repository.management.model.PageType.SWAGGER == page.getType()) {
-            new OAIParser().parse(page.getContent());
+            new OAIParser().parse(page.getContent(), true);
         }
     }
 
