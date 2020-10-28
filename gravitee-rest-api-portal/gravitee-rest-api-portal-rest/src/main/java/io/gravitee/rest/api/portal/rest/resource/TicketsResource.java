@@ -15,18 +15,36 @@
  */
 package io.gravitee.rest.api.portal.rest.resource;
 
+import io.gravitee.common.data.domain.Page;
 import io.gravitee.common.http.MediaType;
+import io.gravitee.repository.analytics.query.Order;
+import io.gravitee.repository.analytics.query.SortBuilder;
+import io.gravitee.repository.analytics.query.SortType;
+import io.gravitee.repository.management.api.search.TicketCriteria;
+import io.gravitee.rest.api.model.TicketEntity;
+import io.gravitee.rest.api.model.common.PageableImpl;
 import io.gravitee.rest.api.portal.rest.mapper.TicketMapper;
 import io.gravitee.rest.api.portal.rest.model.TicketInput;
+import io.gravitee.rest.api.portal.rest.resource.param.PaginationParam;
+import io.gravitee.rest.api.portal.rest.resource.param.TicketsParam;
+import io.gravitee.rest.api.portal.rest.utils.HttpHeadersUtil;
 import io.gravitee.rest.api.service.TicketService;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import javax.ws.rs.BeanParam;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 import java.net.URI;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * @author Azize ELAMRANI (azize.elamrani at graviteesource.com)
@@ -46,5 +64,32 @@ public class TicketsResource extends AbstractResource  {
     public Response create(@Valid @NotNull(message = "Input must not be null.") final TicketInput ticketInput) {
         ticketService.create(getAuthenticatedUser(), ticketMapper.convert(ticketInput));
         return Response.created(URI.create("")).build();
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response search(
+            @Valid @BeanParam PaginationParam paginationParam,
+            @BeanParam TicketsParam ticketsParam) {
+        ticketsParam.validate();
+
+        TicketCriteria criteria =
+                new TicketCriteria.Builder()
+                        .fromUser(getAuthenticatedUser())
+                        .api(ticketsParam.getApi())
+                        .sort(SortBuilder.on(ticketsParam.getField(), ticketsParam.getOrder().equals("ASC") ? Order.ASC : Order.DESC, SortType.AVG))
+                        .build();
+
+        Page<TicketEntity> tickets = ticketService.search(
+                criteria,
+                new PageableImpl(paginationParam.getPage(), paginationParam.getSize()));
+
+        final Map<String, Object> metadataTotal = new HashMap<>();
+        metadataTotal.put(METADATA_DATA_TOTAL_KEY, tickets.getTotalElements());
+
+        final Map<String, Map<String, Object>> metadata = new HashMap<>();
+        metadata.put(METADATA_DATA_KEY, metadataTotal);
+
+        return createListResponse(tickets.getContent(), paginationParam, metadata, false);
     }
 }

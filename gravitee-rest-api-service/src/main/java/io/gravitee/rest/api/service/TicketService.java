@@ -15,7 +15,11 @@
  */
 package io.gravitee.rest.api.service;
 
+import io.gravitee.common.data.domain.Page;
+import io.gravitee.repository.management.api.search.TicketCriteria;
 import io.gravitee.rest.api.model.NewTicketEntity;
+import io.gravitee.rest.api.model.TicketEntity;
+import io.gravitee.rest.api.model.common.Pageable;
 
 /**
  * @author Azize ELAMRANI (azize at graviteesource.com)
@@ -23,5 +27,9 @@ import io.gravitee.rest.api.model.NewTicketEntity;
  */
 public interface TicketService {
 
-    void create(String username, NewTicketEntity ticketEntity);
+    TicketEntity create(String username, NewTicketEntity ticketEntity);
+
+    Page<TicketEntity> search(TicketCriteria criteria, Pageable pageable);
+
+    TicketEntity findById(String ticketId);
 }

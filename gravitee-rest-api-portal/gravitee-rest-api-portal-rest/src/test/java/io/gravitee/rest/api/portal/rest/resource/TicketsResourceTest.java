@@ -15,15 +15,24 @@
  */
 package io.gravitee.rest.api.portal.rest.resource;
 
+import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
 
-import org.junit.Before;
+import io.gravitee.common.data.domain.Page;
+import io.gravitee.repository.analytics.query.Order;
+import io.gravitee.repository.management.api.search.TicketCriteria;
+import io.gravitee.rest.api.model.TicketEntity;
+import io.gravitee.rest.api.portal.rest.model.TicketsResponse;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import io.gravitee.common.http.HttpStatusCode;
@@ -50,7 +59,43 @@ public class TicketsResourceTest extends AbstractResourceTest {
         final Response response = target().request().post(Entity.json(input));
         assertEquals(HttpStatusCode.CREATED_201, response.getStatus());
         
-        Mockito.verify(ticketMapper).convert(input);
-        Mockito.verify(ticketService).create(eq(USER_NAME), any());
+        verify(ticketMapper).convert(input);
+        verify(ticketService).create(eq(USER_NAME), any());
+    }
+
+    @Test
+    public void shouldSearch() {
+        resetAllMocks();
+
+        TicketEntity ticketEntity = new TicketEntity();
+        ticketEntity.setId("1");
+
+        ArgumentCaptor<TicketCriteria> criteriaCaptor = ArgumentCaptor.forClass(TicketCriteria.class);
+
+        when(ticketService.search(criteriaCaptor.capture(), any()))
+                .thenReturn(new Page<>(singletonList(ticketEntity), 1, 1, 1));
+
+        Response response = target()
+                .queryParam("page", 1)
+                .queryParam("size", 10)
+                .queryParam("apiId", "apiId")
+                .queryParam("field", "subject")
+                .queryParam("order", "ASC")
+                .request()
+                .get();
+
+        assertEquals(HttpStatusCode.OK_200, response.getStatus());
+
+        TicketCriteria criteria = criteriaCaptor.getValue();
+        assertEquals("Criteria user", USER_NAME, criteria.getFromUser());
+        assertEquals("Criteria api", "apiId", criteria.getApi());
+        assertEquals("Criteria sort field", "subject", criteria.getSort().getField());
+        assertEquals("Criteria sort order", Order.ASC, criteria.getSort().getOrder());
+
+        verify(ticketService, Mockito.times(1))
+                .search(any(), argThat(o -> o.getPageNumber() == 1 && o.getPageSize() == 10));
+
+        TicketsResponse ticketsResponse = response.readEntity(TicketsResponse.class);
+        assertEquals("Ticket list had not the good size", 1, ticketsResponse.getData().size());
     }
 }
